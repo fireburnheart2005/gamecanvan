@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/reset.css">
+    <style>
+    body {
+    margin:50px 0px; padding:0px;
+    text-align:center;
+    }
+    </style>
+    <script type="text/javascript" src="js/jquery-2.1.1.js"></script>
+    <script type="text/javascript" src="js/underscore.js"></script>
+  </head>
+  <body>
+    <div id="content">
+      <canvas id="imageView" onclick="" width="500" height="200" style="border: solid #000000;"></canvas>
+    </div>
+  </body>
+  <script type="text/javascript" src=""></script>
+</html>
+<script>
+var Box = Backbone.Model.extend({
+        defaults: {
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+            color: "#FF9000",
+            linewidth: 3
+        }
+});
+
+var BoxSet = Backbone.Collection.extend({
+    model:Box
+});
+
+var BoxView= Backbone.View.extend({
+    render : function() {
+        var model=this.model, ctx=this.options.ctx;
+
+        ctx.fillStyle = "#FF9000";
+        ctx.globalAlpha = 0.1;
+        ctx.fillRect(model.get("x"), model.get("y"), model.get("w"), model.get("h")); //transparent box in the back
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = model.get("color");
+        ctx.lineWidth = model.get("linewidth");
+        ctx.strokeRect(model.get("x"), model.get("y"), model.get("w"), model.get("h")); //rectangle on top
+    }
+});
+
+var SetView= Backbone.View.extend({
+
+    initialize: function() {
+            this.collection.on("all",this.render,this);
+    },
+
+    render: function() {
+        var canvas=this.$el.get(0) , ctx=canvas.getContext("2d");
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        this.collection.each(function(model) {
+            var view=new BoxView({ctx:ctx,model:model});
+            view.render();
+        })
+    }
+});
+
+
+
+var c=new BoxSet();
+c.add({x:150,y:150,w:100,h:100});
+c.add({x:10,y:10,w:100,h:100});
+
+var v=new SetView({
+    el:$("canvas"),
+    collection :c
+});
+v.render();
+
+c.add({x:0,y:200,w:20,h:20});
+</script>
