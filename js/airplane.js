@@ -5,19 +5,29 @@ img.onload = function() {
     ctx.drawImage(img, 0, 0);
 }
 img.src = "http://dl.dropbox.com/u/139992952/coffee.png";*/
-var enemyY = 0;
-
+/*$( '#gameCanvas' ).on( "mousemove", function( event ) {
+  console.log( "pageX: " + event.pageX + ", pageY: " + event.pageY );
+});*/
+var enemyXPosition = [200, 300, 400, 500, 150, 100, 250, 350, 450, 550, 230, 490, 370, 435, 270];
+var enemyYPosition = [0, -50, 20, 70, -20, 80, 30, 40, -40, -10, 30, 60, 80, 28, 56];
+var planeX = 0;
+var planeY = 0;
 var game = {
-    setUpGame: function() {
+    setUpGame: function(e, t) {
+        //event = event || window.event;
         this.gameCanvas = document.getElementById("gameCanvas");
         this.planeImage = new Image();
         this.enemyImage = new Image();
-
+        enemyY = 0;
         this.planeImage.src = "img/planes.png";
         this.enemyImage.src = "img/enemyPlane.png";
         this.gameCanvas.getContext("2d").clearRect(0, 0, this.gameCanvas.width, this.gameCanvas.height); //Xoa het trong canvas
-        this.gameCanvas.getContext("2d").drawImage(this.planeImage, Math.random() * 200, Math.random() * 350, 40, 40);
-        this.gameCanvas.getContext("2d").drawImage(this.enemyImage, 200, 150);
+        //var posX = $(t).offset().left,
+        //    posY = $(t).offset().top;
+        var posX = $(t).position().left,
+            posY = $(t).position().top;
+        this.gameCanvas.getContext("2d").drawImage(this.planeImage, e.pageX - posX, e.pageY - posY, 40, 40);
+        // this.gameCanvas.getContext("2d").drawImage(this.enemyImage, 200, 150);
         this.gameCanvas.addEventListener("mousemove", this.redrawPlane);
         this.redrawPlaneEnemy();
     },
@@ -40,21 +50,33 @@ var game = {
         mouseEvent.preventDefault();
         var self = this;
         result = game.ev_mousemove(mouseEvent, self); //get position mouse
-        var x = result.x;
-        var y = result.y;
-        game.gameCanvas.getContext("2d").clearRect(0, 0, game.gameCanvas.width, game.gameCanvas.height); //Xoa het trong canvas
-        game.gameCanvas.getContext("2d").drawImage(game.planeImage, x, y, 40, 40);
-        game.gameCanvas.getContext("2d").drawImage(game.enemyImage, 200, enemyY);
+        planeX = result.x;
+        planeY = result.y;
     },
     redrawPlaneEnemy: function() {
         setTimeout(function() {
             window.requestAnimationFrame(game.redrawPlaneEnemy);
-            enemyY = enemyY + 1;
-            if (enemyY == gameCanvas.height)
+            game.gameCanvas.getContext("2d").clearRect(0, 0, game.gameCanvas.width, game.gameCanvas.height); //Xoa het trong canvas
+            if (planeX > 0 && planeY > 0)
+                game.gameCanvas.getContext("2d").drawImage(game.planeImage, planeX, planeY, 40, 40);
+            if (enemyY == gameCanvas.height) {
                 enemyY = 0;
+            }
+            for (currentNumber = 0; currentNumber < enemyXPosition.length; currentNumber++) {
+                enemyYPosition[currentNumber] = enemyYPosition[currentNumber] + 1; //plus x
+                if (enemyYPosition[currentNumber] == gameCanvas.height)
+                    enemyYPosition[currentNumber] = 0;
+                game.gameCanvas.getContext("2d").drawImage(game.enemyImage, enemyXPosition[currentNumber], enemyYPosition[currentNumber]);
+            }
+
         }, 1000 / 60);;
     },
     init: function() {
         this.setUpGame();
     }
 };
+$(function() {
+    $('#gameCanvas').on('click', function(e) {
+        game.setUpGame(e, this);
+    })
+})
