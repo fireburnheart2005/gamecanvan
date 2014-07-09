@@ -8,10 +8,14 @@ img.src = "http://dl.dropbox.com/u/139992952/coffee.png";*/
 /*$( '#gameCanvas' ).on( "mousemove", function( event ) {
   console.log( "pageX: " + event.pageX + ", pageY: " + event.pageY );
 });*/
-var enemyXPosition = [200, 300, 400, 500, 150, 100, 250, 350, 450, 550, 230, 490, 370, 435, 270];
-var enemyYPosition = [0, -50, 20, 70, -20, 80, 30, 40, -40, -10, 30, 60, 80, 28, 56];
+/*var enemyXPosition = [200, 300, 400, 500, 150, 100, 250, 350, 450, 550, 230, 490, 370, 435, 270];
+var enemyYPosition = [0, -50, 20, 70, -20, 80, 30, 40, -40, -10, 30, 60, 80, 28, 56];*/
+var enemyXPosition = [];
+var enemyYPosition = [];
 var planeX = 0;
 var planeY = 0;
+var ticksSurvived = 0;
+var mostTicksSurvived = 0;
 var game = {
     setUpGame: function(e, t) {
         //event = event || window.event;
@@ -62,14 +66,39 @@ var game = {
             if (enemyY == gameCanvas.height) {
                 enemyY = 0;
             }
+            if (Math.random() < 1 / 20) {
+                enemyXPosition.push(Math.random() * 800);
+                enemyYPosition.push(0);
+            }
+            currentNumber = 0;
+            var planeW = 40;
+            var planeH = 40;
+            var enemyW = game.enemyImage.width;
+            var enemyH = game.enemyImage.height;
             for (currentNumber = 0; currentNumber < enemyXPosition.length; currentNumber++) {
-                enemyYPosition[currentNumber] = enemyYPosition[currentNumber] + 1; //plus x
+                enemyYPosition[currentNumber] = enemyYPosition[currentNumber] + 1; //plus y,lam cho may bay chuyen dong tang dan theo y
                 if (enemyYPosition[currentNumber] == gameCanvas.height)
                     enemyYPosition[currentNumber] = 0;
                 game.gameCanvas.getContext("2d").drawImage(game.enemyImage, enemyXPosition[currentNumber], enemyYPosition[currentNumber]);
+                game.gameCanvas.getContext("2d").fillText("Score: " + ticksSurvived, 10, 20);
+                if ((((planeX < enemyXPosition[currentNumber]) && (enemyXPosition[currentNumber] < planeX + planeW)) || ((planeX < enemyXPosition[currentNumber] + enemyW) && (enemyXPosition[currentNumber] + enemyW < planeX + planeW))) &&
+                    (((planeY < enemyYPosition[currentNumber]) && (enemyYPosition[currentNumber] < planeY + planeH)) || ((planeY < enemyYPosition[currentNumber] + enemyH) && (enemyYPosition[currentNumber] + enemyH < planeY + planeH)))
+                ) {
+                    alert("Bi tan cong roi! Thoi gian song: " + ticksSurvived + " frames");
+                    if (ticksSurvived > mostTicksSurvived) {
+                        mostTicksSurvived = ticksSurvived;
+                        alert("Ky luc moi duoc lap: " + mostTicksSurvived + " frames");
+                    }
+                    game.startNewGame();
+                }
+                ticksSurvived = ticksSurvived + 1;
             }
-
         }, 1000 / 60);;
+    },
+    startNewGame: function() {
+        enemyXPosition = [];
+        enemyYPosition = [];
+        ticksSurvived = 0;
     },
     init: function() {
         this.setUpGame();
